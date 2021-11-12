@@ -1,9 +1,3 @@
-window.indexedDB =
-  window.indexedDB ||
-  window.mozIndexedDB ||
-  window.webkitIndexedDB ||
-  window.msIndexedDB;
-
 let db;
 // create indexDB
 const request = window.indexedDB.open("budgetDB", 1);
@@ -11,7 +5,7 @@ const request = window.indexedDB.open("budgetDB", 1);
 // create a object store
 request.onupgradeneeded = ({ target }) => {
   let db = target.result;
-  let objectStore = db.createObjectStore("budgetStore", {
+  db.createObjectStore("budgetStore", {
     autoIncrement: true,
   });
 };
@@ -33,8 +27,14 @@ request.onerror = function (event) {
   );
 };
 
+function saveRecord(record) {
+  const transaction = db.transaction(["budgetStore"], "readwrite");
+  const store = transaction.objectStore("budgetStore");
+  store.add(record);
+}
+
 function checkDatabase() {
-  const transaction = db.transaction(["budgetStore", "readwrite"]);
+  const transaction = db.transaction(["budgetStore"], "readwrite");
   const store = transaction.objectStore("budgetStore");
   const getAll = store.getAll();
 
@@ -60,12 +60,6 @@ function checkDatabase() {
         });
     }
   };
-}
-
-function saveRecord(record) {
-  const transaction = db.transaction(["budgetStore"], "readwrite");
-  const store = transaction.objectStore("budgetStore");
-  store.add(record);
 }
 
 window.addEventListener("online", checkDatabase);
